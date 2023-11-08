@@ -1,8 +1,4 @@
-# mocking-with-node-test-runner-template
-
-Initial template for my youtube video on [unit testing services (databases, files, web APIs, etc) - pt-br](https://bit.ly/testes-em-servicos-video).
-
-First of all, leave a star in this repo ⭐️
+# mocking-with-node-test-runner
 
 ## Running
 
@@ -12,9 +8,3 @@ Make sure you're using Node.js v20+ and run
 npm ci --silent
 npm start
 ```
-
-## Thanks!
-
-Consider mentioning me on [Twitter](https://twitter.com/erickwendel_/), [linkedin](https://linkedin.com/in/erickwendel/), or [instagram](https://www.instagram.com/erickwendel_/) about the experiments and ideas this repo may have brought to you.
-
-Enjoy!
