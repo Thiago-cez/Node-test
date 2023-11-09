@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "test": "node --test test/",
-    "test:watch": "node --watch --test test/"
+    "test:watch": "node --watch --test test/",
+    "test:cov": "npx c8 --100 --all --exclude src/index.js node --test test/"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,8 @@
     "node": "v20.5.0"
   },
   "dependencies": {
-    "lokijs": "^1.5.12"
+    "c8": "^8.0.1",
+    "lokijs": "^1.5.12",
+    "sinon": "^15.2.0"
   }
 }
