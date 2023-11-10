@@ -9,8 +9,14 @@ export default class Todo {
     }
 
     isValid() {
-        //  - !!
-        return !!this.text && !isNaN(this.when.valueOf())
+        if (!this.text || !this.when) {
+            return false;
+        }
+    
+        // Defina a propriedade status com base nas condições desejadas
+        this.status = this.when > new Date() ? 'pending' : 'late';
+    
+        return true;
     }
 
 }

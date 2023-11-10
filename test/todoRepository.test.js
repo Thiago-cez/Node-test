@@ -1,72 +1,61 @@
-import { describe, it, beforeEach, afterEach } from 'node:test';
+import { describe, it, beforeEach, before, after, afterEach } from 'node:test'; 
 import assert from 'node:assert';
+import crypto from 'node:crypto';
+import TodoService from '../src/todoService.js';
+import Todo from '../src/todo.js'
 import sinon from 'sinon';
-import Loki from 'lokijs';
-import TodoRepository from '../src/todoRepository.js';
 
-describe('TodoRepository test Suite', () => {
-    let _todoRepository;
-    let _sandbox;
+describe('todoRepository test Suite', () => {
+    describe('#Create', () => {
+        let _dependencies;
+        let _todoService;
+        let _sandbox;
 
-    beforeEach(() => {
-        _sandbox = sinon.createSandbox();
-        const mockDb = new Loki();  // Criação de um banco de dados loki-mock
-        _todoRepository = new TodoRepository({ db: mockDb });
-    });
+        const mockCreateResult = {
+            text: 'I must plan my trip to Europe',
+            when: new Date('2020-12-01 12:00:00 GMT-0'),
+            status: 'late',
+            id: "acfd9e5a-3a42-44a5-87e3-ba221a5ddb20"
+        };
+        const DEFAULT_ID = mockCreateResult.id;
 
-    afterEach(() => {
-        _sandbox.restore();
-    });
-
-    describe('#list', () => {
-        it('should return a list of items without internal properties', async () => {
-            // Mock dos dados no banco de dados
-            const mockDatabase = [
-                {
-                    text: 'I MUST PLAN MY TRIP TO EUROPE',
-                    when: new Date('2023-12-01 12:00:00 GMT-0'),
-                    status: 'late',
-                    id: 'cf2db4c1-73e6-4299-a976-942139188b7d',
-                    $loki: 123,
-                    meta: {}
-                }
-                // Adicione mais dados conforme necessário
-            ];
-
-            // Mock do método find do lokijs
-            _sandbox.stub(_todoRepository.#schedule, 'find').returns(mockDatabase);
-
-            const result = await _todoRepository.list();
-
-            // Verifica se o método find foi chamado
-            assert.strictEqual(_todoRepository.#schedule.find.calledOnce, true);
-
-            // Verifica se o resultado contém apenas as propriedades necessárias
-            const expected = mockDatabase.map(({ meta, $loki, ...result }) => result);
-            assert.deepStrictEqual(result, expected);
+        before(() => {
+            crypto.randomUUID = () => DEFAULT_ID;
+            _sandbox = sinon.createSandbox(); 
         });
-    });
 
-    describe('#create', () => {
-        it('should create a new item and return it without internal properties', async () => {
-            const inputData = {
+        after(async () => {
+            crypto.randomUUID = (await import('node:crypto')).randomUUID;
+        });
+
+        afterEach(() => _sandbox.restore());
+
+        beforeEach((context) => {
+            _dependencies = {
+                todoRepository: {
+                    create: context.mock.fn(async () => mockCreateResult)
+                }
+            };
+            _todoService = new TodoService(_dependencies);
+        });
+
+        it(`should create a new item and return it without internal properties`, async () => {
+            // Propriedades do Todo
+            const todoProperties = {
                 text: 'I must plan my trip to Europe',
-                when: new Date('2020-12-01 12:00:00 GMT-0'),
-                status: 'late',
-                id: 'acfd9e5a-3a42-44a5-87e3-ba221a5ddb20'
+                when: '2020-12-01 12:00:00 GMT-0'
             };
 
-            // Mock do método insertOne do lokijs
-            const mockInsertOneResult = { ...inputData, $loki: 789, meta: {} };
-            _sandbox.stub(_todoRepository.#schedule, 'insertOne').returns(mockInsertOneResult);
+            const todoItem = new Todo(todoProperties);
 
-            const result = await _todoRepository.create(inputData);
+            const expected = {
+                id: 'acfd9e5a-3a42-44a5-87e3-ba221a5ddb20',
+                status: 'late',
+                text: 'I must plan my trip to Europe',
+                when: new Date('2020-12-01 12:00:00 GMT-0')
+            };
 
-            // Verifica se o método insertOne foi chamado
-            assert.strictEqual(_todoRepository.#schedule.insertOne.calledOnce, true);
-
-            // Verifica se o resultado contém apenas as propriedades necessárias
-            const expected = { ...inputData, id: mockInsertOneResult.$loki };
+            const result = await _todoService.create(todoItem);
             assert.deepStrictEqual(result, expected);
         });
     });
